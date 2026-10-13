@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>서울사이버대학교 학과찾기</title>
+  
+  <!-- 웹 폰트: Pretendard (지시문: Pretendard 우선, 없으면 Malgun Gothic 등 시스템 맑은 고딕으로 폴백) -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+  
+  <!-- 디자인 시스템 및 공통 스타일시트 (3단계) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       3단계 개발용 화면 전환 미리보기 바
+       (지시문: 구현 후 시작 화면, 질문 화면, 월드컵과 결과 화면의 디자인을 브라우저에서 확인.
+        이 단계의 디자인 예시는 실제 순위 계산 결과와 구분해 개발용 미리보기에서만 사용)
+       ========================================================================== -->
+  <aside class="dev-preview-bar" aria-label="화면 틀 개발용 미리보기">
+    <div class="dev-preview-title">
+      <span>●</span> <span>3단계 디자인 검증용 화면 전환</span>
+    </div>
+    <div class="dev-preview-tabs">
+      <button type="button" class="dev-preview-btn active" data-target="screen-start">1. 시작 (SC00)</button>
+      <button type="button" class="dev-preview-btn" data-target="screen-question">2. 질문 화면</button>
+
+      <button type="button" class="dev-preview-btn" data-target="screen-cup">4. 월드컵 비교</button>
+      <button type="button" class="dev-preview-btn" data-target="screen-result">5. 최종 결과 (SC30)</button>
+      <button type="button" class="dev-preview-btn" id="btnPreviewModal">6. 둘러보기 모달</button>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       상단 공통 헤더
+       (지시문: 공식 원본 확보 시 assets/brand에 저장해 사용하고, 없을 땐 학교명을 일반 텍스트로
+        표시하여 나중에 교체할 수 있게 함. 직접 그리거나 유사 마크 생성 금지)
+       ========================================================================== -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="header-logo" id="headerLogo" tabindex="0" role="banner" aria-label="서울사이버대학교 학과찾기 홈">
+        <!-- [공식 원본 로고 확보 시 교체용 이미지 태그 슬롯] -->
+        <!-- <img src="assets/brand/scu_logo.svg" alt="서울사이버대학교" class="header-logo-img" id="headerLogoImg"> -->
+        
+        <!-- 공식 텍스트 로고 (디자인 시스템 폰트 및 CI 색상 적용) -->
+        <div class="header-logo-text-group">
+          <span class="header-logo-univ">서울사이버대학교</span>
+          <span class="header-logo-service">학과찾기</span>
+        </div>
+      </div>
+
+      <nav class="header-actions" aria-label="상단 메뉴">
+        <button type="button" class="header-btn-browse" id="btnHeaderBrowse">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>전체 학과 둘러보기</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- 진행 상태 표시 바 (질문 진행 시 상단에 고정 표시) -->
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-inner">
+        <div class="progress-info">
+          <div class="progress-stage-name">
+            <span class="stage-badge" id="progressStageBadge">2단계</span>
+            <span id="progressStageText">관심 탐색 (공통 문항)</span>
+          </div>
+          <div class="progress-count" id="progressCountText">
+            <span>질문 1</span> / <span>10</span>
+          </div>
+        </div>
+        <div class="progress-bar-track" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 30%;"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       메인 콘텐츠 영역
+       ========================================================================== -->
+  <main class="main-wrapper" id="mainContainer">
+
+    <!-- ------------------------------------------------------------------------
+         화면 1: 시작 화면 (SC00)
+         ------------------------------------------------------------------------ -->
+    <section class="screen-section active" id="screen-start" aria-labelledby="startTitle">
+      <div class="layout-narrow">
+        <div class="scu-card start-hero">
+          <span class="start-badge-lead">2027학년도 맞춤형 전공 탐색</span>
+          <h1 class="start-title" id="startTitle">
+            나의 관심과 목표에 맞는 서울사이버대학교 학과를 찾아보세요!
+          </h1>
+
+
+          <div class="start-features-grid">
+            <div class="start-feature-item">
+              <div class="start-feature-icon">1</div>
+              <h2 class="start-feature-title">단 3분, 빠르고 간편한 탐색</h2>
+              <p class="start-feature-desc">복잡한 절차 없이 관심 분야와 희망 활동만 가볍게 선택하세요.</p>
+            </div>
+            <div class="start-feature-item">
+              <div class="start-feature-icon">2</div>
+              <h2 class="start-feature-title">1:1 학과 토너먼트</h2>
+              <p class="start-feature-desc">나에게 맞춘 TOP4 학과를 직접 비교하며 가장 마음에 드는 학과를 골라보세요.</p>
+            </div>
+            <div class="start-feature-item">
+              <div class="start-feature-icon">3</div>
+              <h2 class="start-feature-title">맞춤 진로 & 자격 안내</h2>
+              <p class="start-feature-desc">성인 학습자의 목적(취업·학위·자기계발)에 맞는 실질적인 안내를 제공합니다.</p>
+            </div>
+          </div>
+
+          <div class="start-cta-wrap">
+            <button type="button" class="btn-primary" id="btnStartExplore">
+              <span>나에게 맞는 학과 찾기 시작</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+            <span class="start-cta-sub">총 51개 학과·전공 중 나만의 전공을 발견해 보세요</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------------
+         화면 2: 질문 화면 (공통 틀: OB01~OB05, Q1~Q4, A1~F3)
+         (약 720px 레이아웃, 단일 질문 카드, 선택지 목록, 체크 표시, 반응형 360px 대응)
+         ------------------------------------------------------------------------ -->
+    <section class="screen-section" id="screen-question" aria-labelledby="questionTitle">
+      <div class="layout-narrow">
+        <div class="scu-card question-card">
+          <div class="question-header">
+            <div class="question-meta-row">
+              <span class="question-code-badge" id="qCodeBadge">Q1</span>
+              <span class="question-tag" id="qTagText">관심 분야 탐색</span>
+            </div>
+            <h2 class="question-title" id="questionTitle">
+              가장 흥미를 느끼거나 관심 있는 분야는 무엇인가요?
+            </h2>
+            <p class="question-help" id="questionHelp">최대 2개까지 선택할 수 있어요.</p>
+            <div class="question-alert-limit" id="qAlertLimit" role="alert">
+              최대 2개까지만 선택할 수 있어요. 기존 선택을 해제한 후 다른 항목을 골라주세요.
+            </div>
+          </div>
+
+          <!-- 선택지 리스트 (체크 인디케이터, 라벨, 설명) -->
+          <div class="options-list" id="optionsList" role="group" aria-label="선택지 목록">
+            <!-- 샘플 옵션 1 (선택 상태 예시) -->
+            <div class="option-item selected" tabindex="0" role="checkbox" aria-checked="true">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">사회복지·보건·상담</div>
+                <div class="option-desc">사람을 돕고 마음과 건강을 보살피는 따뜻한 전문 분야</div>
+              </div>
+            </div>
+
+            <!-- 샘플 옵션 2 -->
+            <div class="option-item" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">심리·치료·코칭</div>
+                <div class="option-desc">마음의 치유와 인간관계, 개인의 잠재력을 이끌어내는 분야</div>
+              </div>
+            </div>
+
+            <!-- 샘플 옵션 3 -->
+            <div class="option-item" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">IT·인공지능·공학</div>
+                <div class="option-desc">소프트웨어, 빅데이터, 스마트 기술을 선도하는 미래 기술 분야</div>
+              </div>
+            </div>
+
+            <!-- 샘플 옵션 4 -->
+            <div class="option-item" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">경영·금융·부동산</div>
+                <div class="option-desc">비즈니스 감각을 키우고 자산과 조직을 경영하는 실용 분야</div>
+              </div>
+            </div>
+
+            <!-- 샘플 옵션 5 -->
+            <div class="option-item" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">문화·예술·디자인</div>
+                <div class="option-desc">창의적인 콘텐츠와 감성적인 표현으로 세상과 소통하는 분야</div>
+              </div>
+            </div>
+
+            <!-- 샘플 옵션 6 -->
+            <div class="option-item" tabindex="0" role="checkbox" aria-checked="false">
+              <div class="option-indicator" aria-hidden="true">
+                <span class="option-indicator-icon">✔</span>
+              </div>
+              <div class="option-text-wrap">
+                <div class="option-label">미래융합·인문·안전</div>
+                <div class="option-desc">인문학적 사유와 안전, 융합 지식을 탐구하는 넓은 시야의 분야</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 네비게이션 버튼 바 -->
+          <div class="question-nav-bar">
+            <div class="nav-left">
+              <button type="button" class="btn-secondary" id="btnPrevQuestion">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>이전</span>
+              </button>
+            </div>
+            <div class="nav-right">
+              <button type="button" class="btn-skip" id="btnSkipQuestion">
+                건너뛰기
+              </button>
+              <button type="button" class="btn-primary" id="btnNextQuestion">
+                <span>다음</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------------
+         화면 3: TOP4 안내 화면 (SC20)
+         (추천 상위 4개 학과 카드 안내 및 월드컵 시작 버튼)
+         ------------------------------------------------------------------------ -->
+    
+
+    <!-- ------------------------------------------------------------------------
+         화면 4: 월드컵 비교 화면 (SC21, SC22, SC23)
+         (약 1120px 레이아웃, 좌우 대진 카드, 16:9 이미지 영역, 상세 비교 항목, 선택 버튼)
+         ------------------------------------------------------------------------ -->
+    <section class="screen-section" id="screen-cup" aria-labelledby="cupTitle">
+      <div class="layout-wide">
+        <div class="cup-header">
+          <span class="cup-stage-badge" id="cupStageBadge">4강 1경기</span>
+          <h2 class="cup-title" id="cupTitle">어느 학과가 나의 관심에 더 가까운가요?</h2>
+          <p class="cup-subtitle">두 학과의 주요 학습 내용과 자격을 살펴보고, 더 마음이 가는 학과를 선택해 주세요.</p>
+        </div>
+
+        <div class="cup-versus-grid">
+          <!-- 좌측 학과 카드 -->
+          <article class="cup-dept-card" id="cupCardLeft">
+            <div class="cup-card-img-wrap">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder">
+                  <span class="placeholder-college">사회복지대학</span>
+                  <strong class="placeholder-name">사회복지학과</strong>
+                  <span class="placeholder-tag">ID: D01</span>
+                </div>
+              </div>
+            </div>
+            <div class="cup-card-header">
+              <span class="scu-badge scu-badge-college">사회복지대학</span>
+              <h3 class="cup-card-title">사회복지학과</h3>
+            </div>
+            <div class="cup-card-body">
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>📌</span> <span>이런 것을 배워요</span>
+                </div>
+                <div class="cup-info-content">
+                  사회복지 정책과 실천 기술, 사례관리, 사회문제 분석 및 사회복지 현장실습
+                </div>
+              </div>
+
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>🎓</span> <span>대표 취득 자격</span>
+                </div>
+                <div class="cup-info-content">
+                  사회복지사 1급, 사회복지사 2급, 건강가정사, 학교사회복지사
+                </div>
+              </div>
+
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>💼</span> <span>주요 진로 분야</span>
+                </div>
+                <div class="cup-info-content">
+                  종합사회복지관, 공공 복지 전담 공무원, 비영리 재단, 기업 사회공헌팀
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="cup-select-btn" id="btnSelectLeft">
+              <span>이 학과 선택하기</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+          </article>
+
+          <!-- 중앙 VS 구분 뱃지 -->
+          <div class="cup-vs-divider" aria-hidden="true">
+            <div class="cup-vs-badge">VS</div>
+          </div>
+
+          <!-- 우측 학과 카드 -->
+          <article class="cup-dept-card" id="cupCardRight">
+            <div class="cup-card-img-wrap">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder">
+                  <span class="placeholder-college">사회과학대학</span>
+                  <strong class="placeholder-name">노인복지학과</strong>
+                  <span class="placeholder-tag">ID: D02</span>
+                </div>
+              </div>
+            </div>
+            <div class="cup-card-header">
+              <span class="scu-badge scu-badge-college">사회과학대학</span>
+              <h3 class="cup-card-title">노인복지학과</h3>
+            </div>
+            <div class="cup-card-body">
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>📌</span> <span>이런 것을 배워요</span>
+                </div>
+                <div class="cup-info-content">
+                  노년학 개론, 노인케어 매니지먼트, 실버 비즈니스, 치매 케어 및 여가 프로그램 기획
+                </div>
+              </div>
+
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>🎓</span> <span>대표 취득 자격</span>
+                </div>
+                <div class="cup-info-content">
+                  사회복지사 2급, 건강가정사, 실버케어 지도사, 노인여가활동지도사
+                </div>
+              </div>
+
+              <div class="cup-info-block">
+                <div class="cup-info-title">
+                  <span>💼</span> <span>주요 진로 분야</span>
+                </div>
+                <div class="cup-info-content">
+                  노인요양시설, 주야간보호센터, 시니어 복합타운, 실버산업 기획 및 운영
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="cup-select-btn" id="btnSelectRight">
+              <span>이 학과 선택하기</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------------
+         화면 5: 결과 화면 (SC30)
+         (추천 1위 & 최종 선택 병기, 추천 사유, 학습 목적 안내, 2·3위 아코디언,
+          '다른 배움도 살펴보세요' 5초 롤링, 후속 링크 배너 4개, 재시작 버튼)
+         ------------------------------------------------------------------------ -->
+    <section class="screen-section" id="screen-result" aria-labelledby="resultTitle">
+      <div class="layout-wide">
+        <div class="result-header">
+          <span class="result-celebrate-badge">🎉 나에게 맞는 전공 분석 완료</span>
+                     <h2 class="result-title" id="resultTitle">나의 관심 학과 TOP3</h2>
+          <p class="result-desc">학과별 학습 내용과 자격·진로를 확인해 보세요.</p>
+        </div>
+
+        <!-- 주요 학과 카드 (최종 선택과 추천 1위 병기 또는 단일 카드) -->
+        <div class="result-main-grid" id="resultMainGrid"></div>
+
+        <!-- 2위·3위 플립 카드 (이미지 제거) -->
+        
+
+        <!-- '다른 배움도 살펴보세요' 홍보 영역 (5초 롤링 지원) -->
+        <section class="promo-section" aria-labelledby="promoTitle">
+          <div class="promo-header">
+            <div class="promo-title-wrap">
+              <span style="font-size: 20px;">✨</span>
+              <h3 class="promo-title" id="promoTitle">다른 배움도 살펴보세요</h3>
+            </div>
+            <div class="promo-controls">
+              <button type="button" class="promo-ctrl-btn" id="btnPromoPrev" aria-label="이전 홍보 학과">◀</button>
+              <button type="button" class="promo-ctrl-btn" id="btnPromoPause" aria-label="일시정지 / 재생">⏸</button>
+              <button type="button" class="promo-ctrl-btn" id="btnPromoNext" aria-label="다음 홍보 학과">▶</button>
+            </div>
+          </div>
+
+          <!-- 상시 노출 학과 이름 탭 버튼 리스트 -->
+          <div class="promo-tabs" id="promoTabsList" role="tablist">
+            <button type="button" class="promo-tab-btn active" role="tab" aria-selected="true">자유전공</button>
+            <button type="button" class="promo-tab-btn" role="tab" aria-selected="false">철학과</button>
+            <button type="button" class="promo-tab-btn" role="tab" aria-selected="false">미술치료학과</button>
+            <button type="button" class="promo-tab-btn" role="tab" aria-selected="false">공학융합설계학과</button>
+          </div>
+
+          <!-- 롤링 카드 컨테이너 -->
+          <div class="promo-card" id="promoCardWrap">
+            <div class="aspect-16-9-box">
+              <div class="dept-img-placeholder">
+                <span class="placeholder-college">융합교양대학</span>
+                <strong class="placeholder-name">자유전공</strong>
+                <span class="placeholder-tag">ID: D49</span>
+              </div>
+            </div>
+            <div class="promo-card-info">
+              <div>
+                <span class="scu-badge scu-badge-college">융합교양대학</span>
+              </div>
+              <h4 class="promo-card-name">자유전공</h4>
+              <p class="promo-card-intro">
+                전공 결정에 고민이 있는 신·편입생을 위해 입학 후 다양한 학문의 기초 과정을 폭넓게 탐색한 뒤 자신에게 최적인 전공을 선택할 수 있는 자율 설계 과정입니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4개 후속 링크 배너 (학과 홈페이지, 나의 전형찾기, 입학상담하기, 지원하기) -->
+        <section class="action-banners-grid" aria-label="입학 및 상담 바로가기 배너">
+          <a href="https://www.iscu.ac.kr" target="_blank" rel="noopener noreferrer" class="action-banner-item">
+            <div>
+              <div class="banner-title">학과 홈페이지 방문</div>
+              <div class="banner-desc">교수진, 커리큘럼, 학과 소식을 더 자세히 확인하세요.</div>
+            </div>
+            <div class="banner-arrow">바로가기 ↗</div>
+          </a>
+
+          <a href="https://apply.iscu.ac.kr" target="_blank" rel="noopener noreferrer" class="action-banner-item">
+            <div>
+              <div class="banner-title">나의 전형 찾기</div>
+              <div class="banner-desc">나에게 꼭 맞는 입학 장학 혜택과 지원 전형을 확인하세요.</div>
+            </div>
+            <div class="banner-arrow">전형 알아보기 ↗</div>
+          </a>
+
+          <a href="https://www.iscu.ac.kr/03_admission/03_01_counsel_list.asp" target="_blank" rel="noopener noreferrer" class="action-banner-item">
+            <div>
+              <div class="banner-title">1:1 입학 상담하기</div>
+              <div class="banner-desc">입학 전문 상담사가 친절하고 명쾌하게 답변해 드립니다.</div>
+            </div>
+            <div class="banner-arrow">상담 신청하기 ↗</div>
+          </a>
+
+          <a href="https://apply.iscu.ac.kr" target="_blank" rel="noopener noreferrer" class="action-banner-item" style="border-color: var(--scu-ci-green); background-color: #FAFCFB;">
+            <div>
+              <div class="banner-title" style="color: var(--scu-btn-green);">원서 지원하기</div>
+              <div class="banner-desc">2027학년도 서울사이버대학교에 지금 도전해 보세요.</div>
+            </div>
+            <div class="banner-arrow" style="font-weight: 800;">지원하기 ↗</div>
+          </a>
+        </section>
+
+        <!-- 하단 액션 버튼 (다시 비교하기 / 처음부터 다시하기) -->
+        <div class="result-actions-wrap">
+          <button type="button" class="btn-secondary" id="btnRestartCup">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>학과 1:1 비교 다시하기</span>
+          </button>
+          <button type="button" class="btn-primary" id="btnRestartAll">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+            <span>처음부터 다시 탐색하기</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       학과 둘러보기 모달 (OB04-1)
+       (자유전공 포함 51개 항목, 검색창, NEW 배지, 16:9 썸네일)
+       ========================================================================== -->
+  <div class="modal-overlay" id="browseModal" role="dialog" aria-modal="true" aria-labelledby="modalBrowseTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalBrowseTitle">서울사이버대학교 전체 학과 둘러보기</h3>
+        <button type="button" class="modal-close-btn" id="btnModalClose" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-search-bar">
+        <div class="search-input-wrap">
+          <input type="text" class="search-input" id="searchDeptInput" placeholder="관심 있는 학과명, 키워드를 입력해 보세요 (예: 심리, 복지, AI, 부동산)">
+        </div>
+      </div>
+      <div class="modal-body" id="modalDeptList">
+        <div class="browse-grid" id="browseGrid">
+          <!-- 51개 학과 동적 렌더링 영역 (샘플 카드 사전 탑재) -->
+          <div class="browse-item-card">
+            <div class="browse-thumb">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder" style="padding:4px;">
+                  <span style="font-size:10px; font-weight:800; color:var(--scu-btn-green);">D01</span>
+                </div>
+              </div>
+            </div>
+            <div class="browse-info">
+              <span class="scu-badge scu-badge-college" style="font-size:11px; padding:2px 6px;">사회복지대학</span>
+              <strong class="browse-dept-name">사회복지학과</strong>
+              <p class="browse-dept-desc">사회복지사 1급, 건강가정사 등 국가전문자격 취득</p>
+            </div>
+          </div>
+
+          <div class="browse-item-card">
+            <div class="browse-thumb">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder" style="padding:4px;">
+                  <span style="font-size:10px; font-weight:800; color:var(--scu-btn-green);">D05</span>
+                </div>
+              </div>
+            </div>
+            <div class="browse-info">
+              <span class="scu-badge scu-badge-college" style="font-size:11px; padding:2px 6px;">심리·상담대학</span>
+              <strong class="browse-dept-name">상담심리학과</strong>
+              <p class="browse-dept-desc">전문 상담사 양성 및 심리 치유 교육</p>
+            </div>
+          </div>
+
+          <div class="browse-item-card">
+            <div class="browse-thumb">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder" style="padding:4px;">
+                  <span style="font-size:10px; font-weight:800; color:var(--scu-btn-green);">D50</span>
+                </div>
+              </div>
+            </div>
+            <div class="browse-info">
+              <div>
+                <span class="scu-badge scu-badge-college" style="font-size:11px; padding:2px 6px;">미래융합인재대학</span>
+                <span class="scu-badge scu-badge-new" style="font-size:11px; padding:2px 6px;">NEW</span>
+              </div>
+              <strong class="browse-dept-name">철학과</strong>
+              <p class="browse-dept-desc">인간과 세계를 통찰하는 인문학적 성찰</p>
+            </div>
+          </div>
+
+          <div class="browse-item-card">
+            <div class="browse-thumb">
+              <div class="aspect-16-9-box">
+                <div class="dept-img-placeholder" style="padding:4px;">
+                  <span style="font-size:10px; font-weight:800; color:var(--scu-btn-green);">D49</span>
+                </div>
+              </div>
+            </div>
+            <div class="browse-info">
+              <span class="scu-badge scu-badge-college" style="font-size:11px; padding:2px 6px;">융합교양대학</span>
+              <strong class="browse-dept-name">자유전공</strong>
+              <p class="browse-dept-desc">입학 후 전공을 자유롭게 탐색하고 설계</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnModalConfirm" style="min-height: 44px; padding: 10px 20px;">
+          닫고 학과찾기 계속하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       하단 공통 푸터
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p><strong>서울사이버대학교</strong> | 01133 서울특별시 강북구 솔샘로 73 (미아동 193-15)</p>
+      <p class="footer-notes">
+        본 프로그램은 2027학년도 서울사이버대학교 학과찾기 시연용 프로토타입입니다.<br>
+        모든 학과 원고 및 기준 데이터는 2026년 10월 기획서 V1.0을 준수합니다.
+      </p>
+      <p style="color: var(--scu-text-muted); font-size: 12px; margin-top: 4px;">
+        Copyright © Seoul Cyber University. All Rights Reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       데이터 및 로직 스크립트 로드
+       (일반 script 방식으로 CORS 없이 file:// 에서도 안전 실행)
+       ========================================================================== -->
+  <script src="js/config.js"></script>
+  <script src="js/departments.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/cup.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- 월드컵/결과 화면 시연 및 상호작용 보조 스크립트 -->
+  <script>
+    (function() {
+      // 1. 월드컵 화면 시연 버튼 (5단계 구현 전 시연 지원)
+      var btnStartCup = document.getElementById('btnStartCupMatch');
+      if (btnStartCup) {
+        btnStartCup.addEventListener('click', function() {
+          if (window.SCU_APP) window.SCU_APP.showScreen('screen-cup');
+        });
+      }
+
+      var btnSelectLeft = document.getElementById('btnSelectLeft');
+      if (btnSelectLeft) {
+        btnSelectLeft.addEventListener('click', function() {
+          if (window.SCU_APP) window.SCU_APP.showScreen('screen-result');
+        });
+      }
+
+      var btnSelectRight = document.getElementById('btnSelectRight');
+      if (btnSelectRight) {
+        btnSelectRight.addEventListener('click', function() {
+          if (window.SCU_APP) window.SCU_APP.showScreen('screen-result');
+        });
+      }
+
+      var btnRestartCup = document.getElementById('btnRestartCup');
+      if (btnRestartCup) {
+        btnRestartCup.addEventListener('click', function() {
+          if (window.SCU_APP) window.SCU_APP.showScreen('screen-cup');
+        });
+      }
+
+      // 2. 결과 화면 아코디언 토글
+      var accordionToggle = document.getElementById('btnToggleAccordion');
+      var accordionContent = document.getElementById('accordionContent');
+      if (accordionToggle && accordionContent) {
+        accordionToggle.addEventListener('click', function() {
+          var isOpen = accordionToggle.classList.toggle('open');
+          accordionContent.classList.toggle('open', isOpen);
+          accordionToggle.setAttribute('aria-expanded', isOpen);
+        });
+      }
+
+      // 3. 결과 화면 홍보 롤링 시연 (탭 클릭 및 이전/다음)
+      var promoTabs = document.querySelectorAll('.promo-tab-btn');
+      promoTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          promoTabs.forEach(function(t) {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
